@@ -6,80 +6,53 @@
 
 - **Backend:** FastAPI, SQLAlchemy, Alembic, Celery
 - **Frontend:** Vue 3, TypeScript, Vite, Naive UI
-- **Инфраструктура:** Docker Compose (PostgreSQL, Redis, MinIO, nginx)
+- **Инфраструктура:** Docker Compose (PostgreSQL, Redis, MinIO)
 
-## Требования
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) для Windows
-- После установки Docker — перезапуск терминала / ПК при необходимости
-
-## Запуск (всё в Docker)
+## Локально (Windows + Docker Desktop)
 
 ```powershell
-cd D:\projects\AIKworkw
+git clone https://github.com/ice-product96/AIKworkw.git
+cd AIKworkw
 docker compose up --build
 ```
 
-Или скрипт:
-
-```powershell
-.\scripts\docker-up.ps1
-```
-
-При первом старте backend автоматически:
-- применяет миграции Alembic
-- создаёт админа `admin@example.com` / `password`
-
-## URL
+Или: `.\scripts\docker-up.ps1`
 
 | Сервис | URL |
 |--------|-----|
 | Приложение | http://localhost |
 | API Swagger | http://localhost:8000/docs |
-| MinIO Console | http://localhost:9001 (minioadmin / minioadmin) |
 
-## Локальная разработка (опционально)
+Админ при первом старте: `admin@example.com` / `password`
 
-Если нужен hot-reload без пересборки образов — поднимите только инфраструктуру:
+## Деплой на сервер
 
-```powershell
-docker compose up postgres redis minio -d
+Для Linux-сервера с **уже занятыми 80/443** (хостовый nginx):
+
+```bash
+git clone https://github.com/ice-product96/AIKworkw.git
+cd AIKworkw
+cp .env.prod.example .env.prod   # задайте секреты и CORS_ORIGINS
+./scripts/deploy-prod.sh
 ```
 
-И на хосте:
+Подробно: [docs/deploy-server.md](docs/deploy-server.md)
 
-```powershell
-# backend/.env — localhost:5432, localhost:6379
-cd backend
-py -m uvicorn app.main:app --reload --port 8000
-
-cd frontend
-npm run dev
-```
-
-PostgreSQL / Redis / Memurai на Windows **не нужны** — только контейнеры.
+Postgres/Redis/MinIO — только внутри Docker, frontend на `127.0.0.1:8011` для прокси через host nginx.
 
 ## Тестовый агент
 
-```powershell
-$env:AGENT_API_KEY="agt_..."
-$env:AIKWORKW_API="http://localhost:8000/api/v1"
-cd examples\test-agent
-py main.py
+```bash
+export AGENT_API_KEY="agt_..."
+export AIKWORKW_API="http://localhost:8000/api/v1"
+cd examples/test-agent
+python main.py
 ```
 
-## Тесты backend (на хосте)
+## Тесты backend
 
 ```powershell
 cd backend
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
 py -m pytest tests/ -v -p pytest_asyncio.plugin
 ```
-
-## Остановка
-
-```powershell
-docker compose down
-```
-
-Данные PostgreSQL и MinIO сохраняются в Docker volumes (`pgdata`, `miniodata`).
