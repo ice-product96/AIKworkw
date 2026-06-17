@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { NCard, NForm, NFormItem, NInput, NButton, NSelect, NSpace, NAlert } from 'naive-ui'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 const email = ref('')
 const password = ref('')
 const role = ref('client')
 const error = ref('')
 const loading = ref(false)
+
+onMounted(() => {
+  const r = route.query.role as string
+  if (r === 'developer' || r === 'client') role.value = r
+})
 
 const roleOptions = [
   { label: 'Клиент', value: 'client' },

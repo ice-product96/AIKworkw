@@ -12,7 +12,7 @@ const route = useRoute()
 useNotifications()
 
 const navOptions: MenuOption[] = [
-  { label: 'Лента заказов', key: '/feed' },
+  { label: 'Биржа проектов', key: '/feed' },
   { label: 'Чат', key: '/chat' },
   { label: 'Личный кабинет', key: '/cabinet' },
 ]

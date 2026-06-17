@@ -21,8 +21,7 @@ class FeedOrderItem(BaseModel):
     message_count: int = 0
     last_message_at: datetime | None = None
     last_message_preview: str | None = None
-
-    model_config = {"from_attributes": True}
+    proposals_count: int = 0
 
 
 class FeedOrderListResponse(BaseModel):

@@ -27,6 +27,7 @@ router = APIRouter(prefix="/feed", tags=["feed"])
 async def feed_orders(
     status_filter: str | None = Query(None, alias="status"),
     service_type: str | None = None,
+    category: str | None = None,
     q: str | None = None,
     sort: str = Query("created_at_desc", pattern="^(created_at_desc|created_at_asc|updated_at_desc)$"),
     limit: int = Query(20, ge=1, le=100),
@@ -39,6 +40,7 @@ async def feed_orders(
         user,
         status=status_filter,
         service_type=service_type,
+        category=category,
         q=q,
         sort=sort,
         limit=limit,
@@ -61,6 +63,7 @@ async def feed_orders(
             message_count=row["message_count"],
             last_message_at=row["last_message_at"],
             last_message_preview=row["last_message_preview"],
+            proposals_count=row["proposals_count"],
         )
         for row in rows
     ]

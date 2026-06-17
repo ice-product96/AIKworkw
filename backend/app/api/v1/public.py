@@ -1,11 +1,21 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.content import BlogPost, PostStatus, SitePage
+from app.models.domain import Estimate, EstimateStatus, Order, OrderStatus
 from app.schemas.content import BlogPostListItem, BlogPostResponse, SitePageResponse
+from app.schemas.marketplace import (
+    MarketplaceStatsResponse,
+    PublicProjectDetail,
+    PublicProjectListResponse,
+    PublicProjectItem,
+)
 from app.services.content_agent import ensure_home_page
+from app.services.marketplace import get_marketplace_stats, list_public_projects
 
 router = APIRouter(tags=["public"])
 
@@ -47,3 +57,65 @@ async def get_blog_post(slug: str, db: AsyncSession = Depends(get_db)):
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return post
+
+
+@router.get("/marketplace/stats", response_model=MarketplaceStatsResponse)
+async def marketplace_stats(db: AsyncSession = Depends(get_db)):
+    return await get_marketplace_stats(db)
+
+
+@router.get("/projects", response_model=PublicProjectListResponse)
+async def public_projects(
+    category: str | None = None,
+    service_type: str | None = None,
+    q: str | None = None,
+    sort: str = Query("created_at_desc", pattern="^(created_at_desc|created_at_asc|updated_at_desc|budget_desc)$"),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    rows, total = await list_public_projects(
+        db,
+        category=category,
+        service_type=service_type,
+        q=q,
+        sort=sort,
+        limit=limit,
+        offset=offset,
+    )
+    return PublicProjectListResponse(
+        items=[PublicProjectItem(**row) for row in rows],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get("/projects/{order_id}", response_model=PublicProjectDetail)
+async def public_project_detail(order_id: UUID, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Order).where(Order.id == order_id))
+    order = result.scalar_one_or_none()
+    if not order or order.status in (OrderStatus.draft, OrderStatus.cancelled, OrderStatus.failed):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    proposals = (
+        await db.execute(
+            select(func.count())
+            .select_from(Estimate)
+            .where(
+                Estimate.order_id == order.id,
+                Estimate.status.in_([EstimateStatus.submitted, EstimateStatus.selected]),
+            )
+        )
+    ).scalar_one()
+    return PublicProjectDetail(
+        id=order.id,
+        title=order.title,
+        description=order.description,
+        service_type=order.service_type,
+        budget_min=order.budget_min,
+        budget_max=order.budget_max,
+        status=order.status.value,
+        created_at=order.created_at,
+        updated_at=order.updated_at,
+        proposals_count=proposals,
+    )

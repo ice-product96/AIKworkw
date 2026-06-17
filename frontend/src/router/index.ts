@@ -13,6 +13,8 @@ const router = createRouter({
         { path: '', component: () => import('../views/public/LandingView.vue') },
         { path: 'blog', component: () => import('../views/public/BlogListView.vue') },
         { path: 'blog/:slug', component: () => import('../views/public/BlogPostView.vue') },
+        { path: 'projects', component: () => import('../views/public/ProjectsBoardView.vue'), meta: { projectsBase: '/projects' } },
+        { path: 'projects/:id', component: () => import('../views/public/ProjectDetailView.vue') },
       ],
     },
     {
@@ -20,7 +22,7 @@ const router = createRouter({
       component: () => import('../layouts/ShellLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: 'feed', component: () => import('../views/feed/OrderFeedView.vue') },
+        { path: 'feed', component: () => import('../views/feed/OrderFeedView.vue'), meta: { projectsBase: '/feed' } },
         { path: 'feed/orders/:id', component: () => import('../views/feed/FeedOrderDetailView.vue') },
         { path: 'chat', component: () => import('../views/chat/ChatListView.vue') },
         { path: 'chat/:orderId', component: () => import('../views/chat/OrderChatView.vue') },

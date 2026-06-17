@@ -5,7 +5,8 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Agent, User, UserRole
-from app.models.domain import AgentService, Message, Order, OrderStatus
+from app.models.domain import AgentService, Estimate, EstimateStatus, Message, Order, OrderStatus
+from app.services.marketplace import CATEGORY_MAP
 
 
 FEED_EXCLUDED = {OrderStatus.draft, OrderStatus.cancelled, OrderStatus.failed}
@@ -45,6 +46,7 @@ async def list_feed_orders(
     *,
     status: str | None = None,
     service_type: str | None = None,
+    category: str | None = None,
     q: str | None = None,
     sort: str = "created_at_desc",
     limit: int = 20,
@@ -52,6 +54,8 @@ async def list_feed_orders(
 ) -> tuple[list[dict], int]:
     base = select(Order)
     base = _apply_feed_filters(base, status=status, service_type=service_type, q=q)
+    if category and category in CATEGORY_MAP:
+        base = base.where(Order.service_type.in_(CATEGORY_MAP[category]))
 
     if user.role == UserRole.developer:
         types = await _developer_service_types(db, user.id)
@@ -97,6 +101,16 @@ async def list_feed_orders(
         if msg.order_id not in preview_map:
             preview_map[msg.order_id] = msg.text[:120]
 
+    est_stats = await db.execute(
+        select(Estimate.order_id, func.count(Estimate.id))
+        .where(
+            Estimate.order_id.in_(order_ids),
+            Estimate.status.in_([EstimateStatus.submitted, EstimateStatus.selected]),
+        )
+        .group_by(Estimate.order_id)
+    )
+    proposals_map = {row[0]: row[1] for row in est_stats.all()}
+
     items = []
     for order in orders:
         count, last_at = stats_map.get(order.id, (0, None))
@@ -107,6 +121,7 @@ async def list_feed_orders(
                 "message_count": count,
                 "last_message_at": last_at,
                 "last_message_preview": preview_map.get(order.id),
+                "proposals_count": proposals_map.get(order.id, 0),
             }
         )
     return items, total
