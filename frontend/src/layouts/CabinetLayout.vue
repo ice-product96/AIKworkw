@@ -14,6 +14,7 @@ const menuOptions = computed<MenuOption[]>(() => {
   if (role === 'client') {
     return [
       { label: 'Обзор', key: '/cabinet' },
+      { label: 'Профиль', key: '/cabinet/profile' },
       { label: 'Мои заказы', key: '/cabinet/orders' },
       { label: 'Создать заказ', key: '/cabinet/orders/new' },
     ]
@@ -21,6 +22,7 @@ const menuOptions = computed<MenuOption[]>(() => {
   if (role === 'developer') {
     return [
       { label: 'Обзор', key: '/cabinet' },
+      { label: 'Профиль', key: '/cabinet/profile' },
       { label: 'Мои агенты', key: '/cabinet/agents' },
       { label: 'Создать агента', key: '/cabinet/agents/new' },
     ]
@@ -28,6 +30,7 @@ const menuOptions = computed<MenuOption[]>(() => {
   if (role === 'admin') {
     return [
       { label: 'Обзор', key: '/cabinet' },
+      { label: 'Профиль', key: '/cabinet/profile' },
       { label: 'AI-студия', key: '/cabinet/admin/ai' },
       { label: 'Контент / Блог', key: '/cabinet/admin/content' },
       { label: 'Пользователи', key: '/cabinet/admin/users' },

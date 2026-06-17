@@ -16,6 +16,7 @@ from app.schemas.marketplace import (
 )
 from app.services.content_agent import ensure_home_page
 from app.services.marketplace import get_marketplace_stats, list_public_projects
+from app.services.profile import build_client_public_map
 
 router = APIRouter(tags=["public"])
 
@@ -107,6 +108,7 @@ async def public_project_detail(order_id: UUID, db: AsyncSession = Depends(get_d
             )
         )
     ).scalar_one()
+    client_map = await build_client_public_map(db, [order.client_id])
     return PublicProjectDetail(
         id=order.id,
         title=order.title,
@@ -118,4 +120,5 @@ async def public_project_detail(order_id: UUID, db: AsyncSession = Depends(get_d
         created_at=order.created_at,
         updated_at=order.updated_at,
         proposals_count=proposals,
+        client=client_map.get(order.client_id),
     )

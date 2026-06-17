@@ -5,8 +5,9 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Agent, User, UserRole
-from app.models.domain import AgentService, Estimate, EstimateStatus, Message, Order, OrderStatus
+from app.models.domain import AgentService, Estimate, EstimateStatus, Message, Order, OrderStatus, SenderType
 from app.services.marketplace import CATEGORY_MAP
+from app.services.profile import build_client_public_map
 
 
 FEED_EXCLUDED = {OrderStatus.draft, OrderStatus.cancelled, OrderStatus.failed}
@@ -111,6 +112,8 @@ async def list_feed_orders(
     )
     proposals_map = {row[0]: row[1] for row in est_stats.all()}
 
+    client_map = await build_client_public_map(db, [o.client_id for o in orders])
+
     items = []
     for order in orders:
         count, last_at = stats_map.get(order.id, (0, None))
@@ -122,6 +125,7 @@ async def list_feed_orders(
                 "last_message_at": last_at,
                 "last_message_preview": preview_map.get(order.id),
                 "proposals_count": proposals_map.get(order.id, 0),
+                "client": client_map.get(order.client_id),
             }
         )
     return items, total

@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.domain import Agent, AgentStatus, Estimate, EstimateStatus, Order, OrderStatus
 
+from app.services.profile import build_client_public_map
+
 FEED_EXCLUDED = {OrderStatus.draft, OrderStatus.cancelled, OrderStatus.failed}
 
 CATEGORY_MAP: dict[str, list[str]] = {
@@ -116,6 +118,8 @@ async def list_public_projects(
     )
     proposals_map = {row[0]: row[1] for row in est_stats.all()}
 
+    client_map = await build_client_public_map(db, [o.client_id for o in orders])
+
     items = []
     for order in orders:
         desc = order.description.strip()
@@ -132,6 +136,7 @@ async def list_public_projects(
                 "created_at": order.created_at,
                 "updated_at": order.updated_at,
                 "proposals_count": proposals_map.get(order.id, 0),
+                "client": client_map.get(order.client_id),
             }
         )
     return items, total

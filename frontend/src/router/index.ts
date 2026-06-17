@@ -31,6 +31,7 @@ const router = createRouter({
           component: () => import('../layouts/CabinetLayout.vue'),
           children: [
             { path: '', component: () => import('../views/DashboardView.vue') },
+            { path: 'profile', component: () => import('../views/ProfileView.vue') },
             { path: 'orders', component: () => import('../views/client/OrdersView.vue'), meta: { role: 'client' } },
             { path: 'orders/new', component: () => import('../views/client/CreateOrderView.vue'), meta: { role: 'client' } },
             { path: 'orders/:id', component: () => import('../views/client/OrderDetailView.vue'), meta: { role: 'client' } },

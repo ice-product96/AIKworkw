@@ -5,6 +5,9 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
+from app.schemas.profile import ClientPublicInfo
+
+
 class OrderCreate(BaseModel):
     title: str = Field(min_length=3, max_length=255)
     description: str = Field(min_length=10)
@@ -40,6 +43,11 @@ class OrderResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class OrderDetailResponse(OrderResponse):
+    proposals_count: int = 0
+    client: ClientPublicInfo | None = None
 
 
 class EstimateResponse(BaseModel):

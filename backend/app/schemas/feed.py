@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.profile import ClientPublicInfo
+
 
 class FeedOrderItem(BaseModel):
     id: UUID
@@ -22,6 +24,7 @@ class FeedOrderItem(BaseModel):
     last_message_at: datetime | None = None
     last_message_preview: str | None = None
     proposals_count: int = 0
+    client: ClientPublicInfo | None = None
 
 
 class FeedOrderListResponse(BaseModel):

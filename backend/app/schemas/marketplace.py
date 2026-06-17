@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from app.schemas.profile import ClientPublicInfo
+
 
 class MarketplaceStatsResponse(BaseModel):
     users_online: int
@@ -24,6 +26,7 @@ class PublicProjectItem(BaseModel):
     created_at: datetime
     updated_at: datetime
     proposals_count: int = 0
+    client: ClientPublicInfo | None = None
 
 
 class PublicProjectListResponse(BaseModel):
@@ -44,3 +47,4 @@ class PublicProjectDetail(BaseModel):
     created_at: datetime
     updated_at: datetime
     proposals_count: int = 0
+    client: ClientPublicInfo | None = None

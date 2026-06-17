@@ -7,17 +7,21 @@ import { formatBudget, timeAgo } from '../../constants/marketplace'
 import { serviceLabel, statusLabel } from '../../constants/orders'
 import { setPageMeta } from '../../utils/content'
 import { useAuthStore } from '../../stores/auth'
+import BuyerBlock from '../../components/marketplace/BuyerBlock.vue'
+import type { ClientPublicInfo } from '../../types/profile'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(true)
 const project = ref<Record<string, unknown> | null>(null)
+const client = ref<ClientPublicInfo | null>(null)
 
 onMounted(async () => {
   const id = route.params.id as string
   const { data } = await axios.get(`/api/v1/projects/${id}`)
   project.value = data
+  client.value = data.client as ClientPublicInfo | null
   setPageMeta(data.title as string, (data.description as string).slice(0, 160))
   loading.value = false
 })
@@ -49,6 +53,7 @@ function respond() {
             <NText strong>{{ formatBudget(project.budget_min as number, project.budget_max as number) }}</NText>
             <NText depth="3">Опубликован {{ timeAgo(project.created_at as string) }}</NText>
             <div class="description">{{ project.description }}</div>
+            <BuyerBlock v-if="client" :client="client" />
           </NSpace>
         </NCard>
         <NSpace style="margin-top: 16px">

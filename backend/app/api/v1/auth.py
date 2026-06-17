@@ -21,7 +21,8 @@ async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     role = UserRole.client if data.role == "client" else UserRole.developer
-    user = User(email=data.email, password_hash=hash_password(data.password), role=role)
+    display_name = data.email.split("@")[0][:100]
+    user = User(email=data.email, password_hash=hash_password(data.password), role=role, display_name=display_name)
     db.add(user)
     await db.flush()
     await log_action(db, actor_type="user", actor_id=str(user.id), action="user.registered")
@@ -62,4 +63,13 @@ async def refresh(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 async def me(user: User = Depends(get_current_user)):
-    return user
+    from app.services.profile import avatar_url_for
+
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        role=user.role.value,
+        display_name=user.display_name,
+        avatar_url=avatar_url_for(user),
+        created_at=user.created_at,
+    )
