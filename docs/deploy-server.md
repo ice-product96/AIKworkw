@@ -29,9 +29,31 @@ chmod +x scripts/deploy-prod.sh
 | redis     | только внутри Docker-сети              |
 | minio     | только внутри Docker-сети              |
 | backend   | только через frontend (`/api/`)      |
-| frontend  | `127.0.0.1:8011` → прокси host nginx   |
+| frontend  | `0.0.0.0:8011` — доступ из локальной сети по IP сервера |
 
 Порты **5432, 6379, 8000, 9000** на хост **не занимаются** — конфликтов с существующими сервисами нет.
+
+## Доступ из локальной сети
+
+1. В `.env.prod`:
+   ```bash
+   FRONTEND_BIND=0.0.0.0
+   FRONTEND_PORT=8011
+   CORS_ORIGINS=http://192.168.x.x:8011,http://127.0.0.1:8011
+   ```
+   IP сервера: `hostname -I`
+
+2. Перезапуск:
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --force-recreate frontend backend
+   ```
+
+3. Открыть с другого ПК в сети: `http://IP_СЕРВЕРА:8011`
+
+4. Если не открывается — firewall:
+   ```bash
+   sudo ufw allow 8011/tcp
+   ```
 
 ## Nginx на хосте
 

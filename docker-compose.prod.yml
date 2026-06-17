@@ -1,11 +1,12 @@
 # Production on a server with existing nginx on :80/:443.
-# No host ports for postgres/redis/minio; frontend on localhost:8011 only.
+# postgres/redis/minio — only inside Docker network.
+# frontend — FRONTEND_BIND:FRONTEND_PORT (default 0.0.0.0:8011 for LAN access).
 #
 # Setup:
-#   cp .env.prod.example .env.prod   # edit secrets + CORS_ORIGINS
+#   cp .env.prod.example .env.prod   # edit secrets + CORS_ORIGINS (LAN URL!)
 #   docker compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
 #
-# Host nginx: see docker/nginx-host.example.conf
+# Host nginx (optional): docker/nginx-host.example.conf
 
 services:
   postgres:
@@ -91,7 +92,7 @@ services:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - "127.0.0.1:${FRONTEND_PORT:-8011}:80"
+      - "${FRONTEND_BIND:-0.0.0.0}:${FRONTEND_PORT:-8011}:80"
     depends_on:
       - backend
     restart: unless-stopped

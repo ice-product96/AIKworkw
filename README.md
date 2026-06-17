@@ -38,7 +38,7 @@ cp .env.prod.example .env.prod   # задайте секреты и CORS_ORIGINS
 
 Подробно: [docs/deploy-server.md](docs/deploy-server.md)
 
-Postgres/Redis/MinIO — только внутри Docker, frontend на `127.0.0.1:8011` для прокси через host nginx.
+Postgres/Redis/MinIO — только внутри Docker. Frontend по умолчанию на `0.0.0.0:8011` (доступ из LAN: `http://IP_СЕРВЕРА:8011`).
 
 ## Тестовый агент
 
