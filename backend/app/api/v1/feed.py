@@ -17,7 +17,7 @@ from app.schemas.feed import (
     NotificationPollResponse,
 )
 from app.schemas.order import OrderResponse
-from app.services.feed import list_chat_orders, list_feed_orders, poll_notifications
+from app.services.feed import list_feed_orders, poll_notifications
 from app.services.order_service import get_order_for_client
 
 router = APIRouter(prefix="/feed", tags=["feed"])

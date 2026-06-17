@@ -35,6 +35,9 @@ class ChatOrderItem(BaseModel):
     order_id: UUID
     title: str
     status: str
+    service_type: str | None = None
+    is_mine: bool = False
+    message_count: int = 0
     last_message_at: datetime | None
     last_message_preview: str | None
     last_sender_type: str | None

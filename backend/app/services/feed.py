@@ -134,60 +134,8 @@ async def accessible_order_ids(db: AsyncSession, user: User) -> list[UUID] | Non
         result = await db.execute(select(Order.id).where(Order.client_id == user.id))
         return [row[0] for row in result.all()]
     if user.role == UserRole.developer:
-        result = await db.execute(select(Agent.id).where(Agent.developer_id == user.id))
-        agent_ids = [row[0] for row in result.all()]
-        if not agent_ids:
-            return []
-        result = await db.execute(select(Order.id).where(Order.selected_agent_id.in_(agent_ids)))
-        return [row[0] for row in result.all()]
+        return None
     return []
-
-
-async def list_chat_orders(db: AsyncSession, user: User) -> list[dict]:
-    order_ids = await accessible_order_ids(db, user)
-    if order_ids is not None and not order_ids:
-        return []
-
-    query = (
-        select(Order)
-        .where(Order.status.not_in([OrderStatus.draft]))
-        .order_by(Order.updated_at.desc())
-    )
-    if order_ids is not None:
-        query = query.where(Order.id.in_(order_ids))
-
-    orders = list((await db.execute(query.limit(100))).scalars().all())
-    if not orders:
-        return []
-
-    ids = [o.id for o in orders]
-    msgs = await db.execute(
-        select(Message)
-        .where(Message.order_id.in_(ids), Message.is_blocked.is_(False))
-        .order_by(Message.created_at.desc())
-    )
-    last_by_order: dict[UUID, Message] = {}
-    for msg in msgs.scalars().all():
-        if msg.order_id not in last_by_order:
-            last_by_order[msg.order_id] = msg
-
-    items = []
-    for order in orders:
-        last = last_by_order.get(order.id)
-        if not last and user.role != UserRole.client:
-            continue
-        items.append(
-            {
-                "order_id": order.id,
-                "title": order.title,
-                "status": order.status.value,
-                "last_message_at": last.created_at if last else None,
-                "last_message_preview": last.text[:120] if last else None,
-                "last_sender_type": last.sender_type.value if last else None,
-            }
-        )
-    items.sort(key=lambda x: x["last_message_at"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
-    return items
 
 
 async def poll_notifications(
@@ -206,7 +154,9 @@ async def poll_notifications(
     if user.role == UserRole.client:
         msg_q = msg_q.where(Message.sender_type != SenderType.client)
     elif user.role == UserRole.developer:
-        msg_q = msg_q.where(Message.sender_type.in_([SenderType.client, SenderType.system, SenderType.admin]))
+        msg_q = msg_q.where(
+            Message.sender_type.in_([SenderType.client, SenderType.agent, SenderType.system, SenderType.admin])
+        )
     if order_ids is not None:
         msg_q = msg_q.where(Message.order_id.in_(order_ids))
 

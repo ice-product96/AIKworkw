@@ -24,8 +24,8 @@ const router = createRouter({
       children: [
         { path: 'feed', component: () => import('../views/feed/OrderFeedView.vue'), meta: { projectsBase: '/feed' } },
         { path: 'feed/orders/:id', component: () => import('../views/feed/FeedOrderDetailView.vue') },
-        { path: 'chat', component: () => import('../views/chat/ChatListView.vue') },
-        { path: 'chat/:orderId', component: () => import('../views/chat/OrderChatView.vue') },
+        { path: 'chat', component: () => import('../views/chat/MessengerView.vue') },
+        { path: 'chat/:orderId', component: () => import('../views/chat/MessengerView.vue') },
         {
           path: 'cabinet',
           component: () => import('../layouts/CabinetLayout.vue'),
