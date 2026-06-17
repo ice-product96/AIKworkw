@@ -48,6 +48,8 @@ const router = createRouter({
     },
     { path: '/dashboard', redirect: '/cabinet' },
     { path: '/dashboard/:pathMatch(.*)*', redirect: (to) => `/cabinet/${to.params.pathMatch}` },
+    { path: '/admin', redirect: '/cabinet/admin/ai' },
+    { path: '/admin/:pathMatch(.*)*', redirect: (to) => `/cabinet/admin/${to.params.pathMatch}` },
   ],
 })
 
@@ -59,10 +61,10 @@ router.beforeEach(async (to) => {
       try {
         await auth.fetchMe()
       } catch {
-        return '/login'
+        return { path: '/login', query: { redirect: to.fullPath } }
       }
     } else {
-      return '/login'
+      return { path: '/login', query: { redirect: to.fullPath } }
     }
   }
   if (to.meta.guest && auth.user) {

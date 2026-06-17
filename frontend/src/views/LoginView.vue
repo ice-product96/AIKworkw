@@ -1,23 +1,31 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NAlert } from 'naive-ui'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+
+function defaultPath(role: string) {
+  if (role === 'admin') return '/cabinet/admin/ai'
+  if (role === 'developer') return '/cabinet/agents'
+  return '/feed'
+}
 
 async function submit() {
   loading.value = true
   error.value = ''
   try {
     await auth.login(email.value, password.value)
-    router.push('/feed')
-  } catch (e: unknown) {
+    const redirect = route.query.redirect as string | undefined
+    router.push(redirect || defaultPath(auth.user?.role || 'client'))
+  } catch {
     error.value = 'Неверный email или пароль'
   } finally {
     loading.value = false
