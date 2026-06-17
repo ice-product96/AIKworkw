@@ -3,7 +3,6 @@ import { RouterView, useRouter } from 'vue-router'
 import { NLayout, NLayoutHeader, NLayoutContent, NButton, NSpace, NText } from 'naive-ui'
 import { useAuthStore } from '../stores/auth'
 import MarketplaceStatsBar from '../components/marketplace/MarketplaceStatsBar.vue'
-import { MARKETPLACE_CATEGORIES } from '../constants/marketplace'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -34,43 +33,9 @@ function placeOrder() {
           </NButton>
         </NSpace>
       </NSpace>
-      <div class="quick-cats">
-        <button
-          v-for="cat in MARKETPLACE_CATEGORIES"
-          :key="cat.slug"
-          type="button"
-          class="quick-cat"
-          @click="router.push({ path: '/projects', query: { category: cat.slug } })"
-        >
-          {{ cat.icon }} {{ cat.label }}
-        </button>
-      </div>
     </NLayoutHeader>
     <NLayoutContent>
       <RouterView />
     </NLayoutContent>
   </NLayout>
 </template>
-
-<style scoped>
-.quick-cats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 12px;
-  max-width: 1200px;
-}
-.quick-cat {
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  color: #444;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-.quick-cat:hover {
-  background: #e8f5e9;
-  color: #1b5e20;
-}
-</style>

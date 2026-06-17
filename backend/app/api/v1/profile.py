@@ -58,7 +58,10 @@ async def upload_avatar(
     user.avatar_path = path
     user.updated_at = datetime.now(timezone.utc)
     await log_action(db, actor_type="user", actor_id=str(user.id), action="profile.avatar_updated")
-    return await build_profile_response(db, user)
+    response = await build_profile_response(db, user)
+    # Commit before response so GET /avatars/{id} sees avatar_path immediately.
+    await db.commit()
+    return response
 
 
 @router.get("/avatars/{user_id}")

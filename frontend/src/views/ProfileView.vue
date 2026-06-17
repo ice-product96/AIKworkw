@@ -15,6 +15,7 @@ const loading = ref(false)
 const saving = ref(false)
 const uploadingAvatar = ref(false)
 const avatarVersion = ref(0)
+const avatarPreview = ref<string | null>(null)
 
 const form = ref({
   display_name: '',
@@ -28,16 +29,24 @@ const form = ref({
 const isClient = computed(() => profile.value?.role === 'client')
 const isDeveloper = computed(() => profile.value?.role === 'developer')
 const avatarSrc = computed(() => {
+  if (avatarPreview.value) return avatarPreview.value
   if (!profile.value?.avatar_url) return undefined
   const joiner = profile.value.avatar_url.includes('?') ? '&' : '?'
   return `${profile.value.avatar_url}${joiner}t=${avatarVersion.value}`
 })
+const avatarFallback = computed(() =>
+  (form.value.display_name || profile.value?.email || '?').slice(0, 1).toUpperCase(),
+)
 
 async function load() {
   loading.value = true
   try {
     const { data } = await api.get('/profile/me')
     profile.value = data
+    if (data.avatar_url && avatarPreview.value) {
+      URL.revokeObjectURL(avatarPreview.value)
+      avatarPreview.value = null
+    }
     form.value = {
       display_name: data.display_name || '',
       bio: data.bio || '',
@@ -70,9 +79,12 @@ async function uploadAvatar({ file, onFinish, onError }: UploadCustomRequestOpti
   }
   uploadingAvatar.value = true
   try {
+    const imageFile = file.file as File
     const fd = new FormData()
-    fd.append('file', file.file as File)
+    fd.append('file', imageFile)
     const { data } = await api.post('/profile/avatar', fd)
+    if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value)
+    avatarPreview.value = URL.createObjectURL(imageFile)
     profile.value = data
     avatarVersion.value = Date.now()
     await auth.fetchMe()
@@ -102,9 +114,10 @@ onMounted(load)
               round
               :size="96"
               :src="avatarSrc"
+              object-fit="cover"
               style="background: #4caf50; font-size: 36px"
             >
-              {{ (form.display_name || profile?.email || '?').slice(0, 1).toUpperCase() }}
+              {{ avatarFallback }}
             </NAvatar>
             <NUpload :show-file-list="false" accept="image/*" :custom-request="uploadAvatar">
               <NButton size="small" :loading="uploadingAvatar">Загрузить фото</NButton>
