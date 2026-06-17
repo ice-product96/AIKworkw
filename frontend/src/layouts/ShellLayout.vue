@@ -12,14 +12,14 @@ const route = useRoute()
 useNotifications()
 
 const navOptions: MenuOption[] = [
-  { label: 'Биржа проектов', key: '/feed' },
+  { label: 'Биржа проектов', key: '/projects' },
   { label: 'Чат', key: '/chat' },
   { label: 'Личный кабинет', key: '/cabinet' },
 ]
 
 const activeNav = computed(() => {
   const p = route.path
-  if (p.startsWith('/feed')) return '/feed'
+  if (p.startsWith('/projects')) return '/projects'
   if (p.startsWith('/chat')) return '/chat'
   if (p.startsWith('/cabinet')) return '/cabinet'
   return p

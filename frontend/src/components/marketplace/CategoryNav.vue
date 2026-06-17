@@ -5,7 +5,7 @@ import { MARKETPLACE_CATEGORIES } from '../../constants/marketplace'
 const router = useRouter()
 const route = useRoute()
 
-const basePath = () => (route.path.startsWith('/feed') ? '/feed' : '/projects')
+const basePath = () => '/projects'
 
 function goCategory(slug: string | null) {
   const base = basePath()

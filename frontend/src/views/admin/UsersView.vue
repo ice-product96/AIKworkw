@@ -6,9 +6,19 @@ import api from '../../api/client'
 
 const users = ref<Record<string, unknown>[]>([])
 
+const roleLabels: Record<string, string> = {
+  client: 'Клиент',
+  developer: 'Разработчик',
+  admin: 'Администратор',
+}
+
 const columns: DataTableColumns = [
-  { title: 'Email', key: 'email' },
-  { title: 'Роль', key: 'role' },
+  { title: 'Почта', key: 'email' },
+  {
+    title: 'Роль',
+    key: 'role',
+    render: (row) => roleLabels[String(row.role)] || String(row.role),
+  },
   {
     title: '',
     key: 'id',

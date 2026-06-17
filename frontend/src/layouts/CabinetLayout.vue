@@ -37,7 +37,7 @@ const menuOptions = computed<MenuOption[]>(() => {
       { label: 'Агенты', key: '/cabinet/admin/agents' },
       { label: 'Заказы', key: '/cabinet/admin/orders' },
       { label: 'Нарушения', key: '/cabinet/admin/violations' },
-      { label: 'Webhooks', key: '/cabinet/admin/webhooks' },
+      { label: 'Вебхуки', key: '/cabinet/admin/webhooks' },
     ]
   }
   return [{ label: 'Обзор', key: '/cabinet' }]

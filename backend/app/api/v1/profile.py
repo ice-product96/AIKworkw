@@ -1,6 +1,9 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import Response
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -9,7 +12,7 @@ from app.models import User
 from app.schemas.profile import ProfileResponse, ProfileUpdate
 from app.services.audit import log_action
 from app.services.profile import build_profile_response
-from app.services.storage import upload_file
+from app.services.storage import content_type_for_path, get_file, upload_file
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -45,13 +48,31 @@ async def upload_avatar(
 ):
     content_type = file.content_type or "application/octet-stream"
     if content_type not in ALLOWED_AVATAR_TYPES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image type")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Недопустимый формат изображения")
     data = await file.read()
     if len(data) > MAX_AVATAR_SIZE:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File too large (max 2MB)")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Файл слишком большой (макс. 2 МБ)")
     ext = content_type.split("/")[-1].replace("jpeg", "jpg")
     path = f"avatars/{user.id}.{ext}"
     upload_file(path, data, content_type)
     user.avatar_path = path
+    user.updated_at = datetime.now(timezone.utc)
     await log_action(db, actor_type="user", actor_id=str(user.id), action="profile.avatar_updated")
     return await build_profile_response(db, user)
+
+
+@router.get("/avatars/{user_id}")
+async def get_avatar(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user or not user.avatar_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Аватар не найден")
+    try:
+        data = get_file(user.avatar_path)
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Аватар не найден") from exc
+    return Response(
+        content=data,
+        media_type=content_type_for_path(user.avatar_path),
+        headers={"Cache-Control": "public, max-age=3600"},
+    )

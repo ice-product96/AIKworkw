@@ -48,3 +48,21 @@ def generate_presigned_url(storage_path: str) -> str:
         Params={"Bucket": settings.minio_bucket, "Key": storage_path},
         ExpiresIn=settings.presigned_url_expire_seconds,
     )
+
+
+def get_file(storage_path: str) -> bytes:
+    client = get_s3_client()
+    obj = client.get_object(Bucket=settings.minio_bucket, Key=storage_path)
+    return obj["Body"].read()
+
+
+def content_type_for_path(storage_path: str) -> str:
+    ext = storage_path.rsplit(".", 1)[-1].lower()
+    mapping = {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "webp": "image/webp",
+        "gif": "image/gif",
+    }
+    return mapping.get(ext, "application/octet-stream")

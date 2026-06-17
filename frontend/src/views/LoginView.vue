@@ -15,7 +15,7 @@ const loading = ref(false)
 function defaultPath(role: string) {
   if (role === 'admin') return '/cabinet/admin/ai'
   if (role === 'developer') return '/cabinet/agents'
-  return '/feed'
+  return '/projects'
 }
 
 async function submit() {
@@ -38,7 +38,7 @@ async function submit() {
     <NCard title="Вход" style="max-width: 400px; width: 100%">
       <NAlert v-if="error" type="error" style="margin-bottom: 16px">{{ error }}</NAlert>
       <NForm @submit.prevent="submit">
-        <NFormItem label="Email">
+        <NFormItem label="Почта">
           <NInput v-model:value="email" />
         </NFormItem>
         <NFormItem label="Пароль">

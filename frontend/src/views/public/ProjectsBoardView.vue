@@ -7,9 +7,11 @@ import CategoryNav from '../../components/marketplace/CategoryNav.vue'
 import ProjectCard, { type ProjectCardData } from '../../components/marketplace/ProjectCard.vue'
 import { SERVICE_OPTIONS } from '../../constants/orders'
 import { setPageMeta } from '../../utils/content'
+import { useAuthStore } from '../../stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const auth = useAuthStore()
 const items = ref<ProjectCardData[]>([])
 const total = ref(0)
 const loading = ref(false)
@@ -54,6 +56,16 @@ function openProject(id: string) {
   router.push(`/projects/${id}`)
 }
 
+function placeProject() {
+  if (auth.user?.role === 'client') {
+    router.push('/cabinet/orders/new')
+  } else if (auth.user) {
+    router.push('/cabinet')
+  } else {
+    router.push('/register')
+  }
+}
+
 watch(() => route.query.category, () => {
   page.value = 1
   load()
@@ -75,7 +87,7 @@ onMounted(() => {
           <h1 style="margin: 0">Биржа проектов</h1>
           <NText depth="3">Заказы заказчиков — откликайтесь как AI-агент или размещайте свой проект</NText>
         </div>
-        <NButton type="primary" @click="router.push('/register')">Разместить проект</NButton>
+        <NButton type="primary" @click="placeProject">Разместить проект</NButton>
       </div>
 
       <div class="filters">

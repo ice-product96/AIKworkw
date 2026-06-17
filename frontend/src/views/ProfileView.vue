@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import {
   NCard, NForm, NFormItem, NInput, NButton, NSpace, NAvatar, NUpload, NText, NStatistic, NGrid, NGridItem, useMessage,
 } from 'naive-ui'
-import type { UploadFileInfo } from 'naive-ui'
+import type { UploadCustomRequestOptions } from 'naive-ui'
 import api from '../api/client'
 import { useAuthStore } from '../stores/auth'
 import type { UserProfile } from '../types/profile'
@@ -13,6 +13,8 @@ const auth = useAuthStore()
 const profile = ref<UserProfile | null>(null)
 const loading = ref(false)
 const saving = ref(false)
+const uploadingAvatar = ref(false)
+const avatarVersion = ref(0)
 
 const form = ref({
   display_name: '',
@@ -25,6 +27,11 @@ const form = ref({
 
 const isClient = computed(() => profile.value?.role === 'client')
 const isDeveloper = computed(() => profile.value?.role === 'developer')
+const avatarSrc = computed(() => {
+  if (!profile.value?.avatar_url) return undefined
+  const joiner = profile.value.avatar_url.includes('?') ? '&' : '?'
+  return `${profile.value.avatar_url}${joiner}t=${avatarVersion.value}`
+})
 
 async function load() {
   loading.value = true
@@ -56,16 +63,27 @@ async function save() {
   }
 }
 
-async function uploadAvatar({ file }: { file: UploadFileInfo }) {
-  if (!file.file) return
-  const fd = new FormData()
-  fd.append('file', file.file)
-  const { data } = await api.post('/profile/avatar', fd, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
-  profile.value = data
-  await auth.fetchMe()
-  message.success('Аватар обновлён')
+async function uploadAvatar({ file, onFinish, onError }: UploadCustomRequestOptions) {
+  if (!file.file) {
+    onError()
+    return
+  }
+  uploadingAvatar.value = true
+  try {
+    const fd = new FormData()
+    fd.append('file', file.file as File)
+    const { data } = await api.post('/profile/avatar', fd)
+    profile.value = data
+    avatarVersion.value = Date.now()
+    await auth.fetchMe()
+    message.success('Аватар обновлён')
+    onFinish()
+  } catch {
+    message.error('Не удалось загрузить аватар')
+    onError()
+  } finally {
+    uploadingAvatar.value = false
+  }
 }
 
 onMounted(load)
@@ -83,13 +101,13 @@ onMounted(load)
             <NAvatar
               round
               :size="96"
-              :src="profile?.avatar_url || undefined"
+              :src="avatarSrc"
               style="background: #4caf50; font-size: 36px"
             >
               {{ (form.display_name || profile?.email || '?').slice(0, 1).toUpperCase() }}
             </NAvatar>
-            <NUpload :show-file-list="false" accept="image/*" @change="uploadAvatar">
-              <NButton size="small">Загрузить фото</NButton>
+            <NUpload :show-file-list="false" accept="image/*" :custom-request="uploadAvatar">
+              <NButton size="small" :loading="uploadingAvatar">Загрузить фото</NButton>
             </NUpload>
             <NSpace v-if="profile">
               <NStatistic label="Уровень" :value="profile.level" />

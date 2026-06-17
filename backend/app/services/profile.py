@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User
 from app.models.domain import Agent, Order, OrderStatus
 from app.schemas.profile import ClientPublicInfo, ProfileResponse
-from app.services.storage import generate_presigned_url
 
 PUBLISHED_STATUSES = {
     OrderStatus.awaiting_estimate,
@@ -29,10 +28,8 @@ def default_display_name(user: User) -> str:
 def avatar_url_for(user: User) -> str | None:
     if not user.avatar_path:
         return None
-    try:
-        return generate_presigned_url(user.avatar_path)
-    except Exception:
-        return None
+    version = int(user.updated_at.timestamp()) if user.updated_at else 0
+    return f"/api/v1/profile/avatars/{user.id}?v={version}"
 
 
 def compute_level(projects_posted: int, completed: int) -> int:

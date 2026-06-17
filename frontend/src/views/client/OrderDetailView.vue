@@ -54,9 +54,7 @@ async function dispute() {
 async function uploadFile({ file }: { file: UploadFileInfo }) {
   const form = new FormData()
   form.append('file', file.file as File)
-  await api.post(`/orders/${orderId}/files`, form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+  await api.post(`/orders/${orderId}/files`, form)
   await load()
 }
 

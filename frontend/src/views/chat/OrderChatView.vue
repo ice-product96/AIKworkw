@@ -28,7 +28,7 @@ async function loadMessages() {
 
 async function loadOrder() {
   try {
-    const { data } = await api.get(`/feed/orders/${orderId}`)
+    const { data } = await api.get(`/projects/${orderId}`)
     orderTitle.value = data.title
   } catch {
     orderTitle.value = `Заказ ${orderId.slice(0, 8)}`

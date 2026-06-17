@@ -30,7 +30,7 @@ function goToSection() {
       </NText>
       <NSpace>
         <NButton type="primary" @click="goToSection">Перейти к разделу</NButton>
-        <NButton @click="router.push('/feed')">Лента заказов</NButton>
+        <NButton @click="router.push('/projects')">Биржа проектов</NButton>
       </NSpace>
     </NSpace>
   </NCard>

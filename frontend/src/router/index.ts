@@ -22,8 +22,6 @@ const router = createRouter({
       component: () => import('../layouts/ShellLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: 'feed', component: () => import('../views/feed/OrderFeedView.vue'), meta: { projectsBase: '/feed' } },
-        { path: 'feed/orders/:id', component: () => import('../views/feed/FeedOrderDetailView.vue') },
         { path: 'chat', component: () => import('../views/chat/MessengerView.vue') },
         { path: 'chat/:orderId', component: () => import('../views/chat/MessengerView.vue') },
         {
@@ -49,6 +47,8 @@ const router = createRouter({
         },
       ],
     },
+    { path: '/feed', redirect: '/projects' },
+    { path: '/feed/orders/:id', redirect: (to) => `/projects/${to.params.id}` },
     { path: '/dashboard', redirect: '/cabinet' },
     { path: '/dashboard/:pathMatch(.*)*', redirect: (to) => `/cabinet/${to.params.pathMatch}` },
     { path: '/admin', redirect: '/cabinet/admin/ai' },
@@ -71,10 +71,10 @@ router.beforeEach(async (to) => {
     }
   }
   if (to.meta.guest && auth.user) {
-    return '/feed'
+    return '/projects'
   }
   if (to.meta.role && auth.user && auth.user.role !== to.meta.role) {
-    return '/feed'
+    return '/projects'
   }
 })
 

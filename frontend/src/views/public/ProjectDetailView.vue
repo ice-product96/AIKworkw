@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { NButton, NCard, NTag, NSpace, NText, NSpin } from 'naive-ui'
@@ -17,6 +17,12 @@ const loading = ref(true)
 const project = ref<Record<string, unknown> | null>(null)
 const client = ref<ClientPublicInfo | null>(null)
 
+const isOwner = computed(() =>
+  !!client.value &&
+  auth.user?.role === 'client' &&
+  String(client.value.id) === String(auth.user.id),
+)
+
 onMounted(async () => {
   const id = route.params.id as string
   const { data } = await axios.get(`/api/v1/projects/${id}`)
@@ -27,11 +33,7 @@ onMounted(async () => {
 })
 
 function respond() {
-  if (auth.user) {
-    router.push(auth.user.role === 'developer' ? '/cabinet/agents' : '/login?redirect=' + encodeURIComponent(route.fullPath))
-  } else {
-    router.push({ path: '/register', query: { role: 'developer' } })
-  }
+  router.push('/cabinet/agents')
 }
 </script>
 
@@ -59,7 +61,8 @@ function respond() {
         <NSpace style="margin-top: 16px">
           <NButton v-if="!auth.user" type="primary" @click="router.push('/register')">Войти и откликнуться</NButton>
           <NButton v-else-if="auth.user.role === 'developer'" type="primary" @click="respond">Откликнуться (через агента)</NButton>
-          <NButton v-else type="primary" @click="router.push(`/feed/orders/${project.id}`)">Открыть в ленте</NButton>
+          <NButton v-if="auth.user" type="primary" @click="router.push(`/chat/${project.id}`)">Открыть чат</NButton>
+          <NButton v-if="isOwner" @click="router.push(`/cabinet/orders/${project.id}`)">Управление в кабинете</NButton>
           <NButton @click="router.push('/projects')">Другие проекты</NButton>
         </NSpace>
       </template>

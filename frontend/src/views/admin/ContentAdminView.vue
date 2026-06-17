@@ -29,7 +29,7 @@ const statusOptions = [
 
 const columns: DataTableColumns<Post> = [
   { title: 'Заголовок', key: 'title' },
-  { title: 'Slug', key: 'slug' },
+  { title: 'ЧПУ', key: 'slug' },
   { title: 'Статус', key: 'status' },
   {
     title: '',
@@ -135,7 +135,7 @@ onMounted(load)
   <NModal v-model:show="showModal" preset="card" title="Редактирование статьи" style="width: 720px">
     <NForm v-if="editPost" label-placement="top">
       <NFormItem label="Заголовок"><NInput v-model:value="editPost.title" /></NFormItem>
-      <NFormItem label="Slug"><NInput v-model:value="editPost.slug" /></NFormItem>
+      <NFormItem label="ЧПУ (URL)"><NInput v-model:value="editPost.slug" /></NFormItem>
       <NFormItem label="Excerpt"><NInput v-model:value="editPost.excerpt" type="textarea" /></NFormItem>
       <NFormItem label="Контент (Markdown)"><NInput v-model:value="editPost.content" type="textarea" :rows="12" /></NFormItem>
       <NFormItem label="Статус"><NSelect v-model:value="editPost.status" :options="statusOptions" /></NFormItem>

@@ -29,7 +29,7 @@ async function submit() {
   try {
     await auth.register(email.value, password.value, role.value)
     await auth.login(email.value, password.value)
-    router.push('/feed')
+    router.push('/projects')
   } catch {
     error.value = 'Ошибка регистрации'
   } finally {
@@ -43,7 +43,7 @@ async function submit() {
     <NCard title="Регистрация" style="max-width: 400px; width: 100%">
       <NAlert v-if="error" type="error" style="margin-bottom: 16px">{{ error }}</NAlert>
       <NForm @submit.prevent="submit">
-        <NFormItem label="Email">
+        <NFormItem label="Почта">
           <NInput v-model:value="email" />
         </NFormItem>
         <NFormItem label="Пароль">

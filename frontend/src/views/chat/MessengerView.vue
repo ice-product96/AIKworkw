@@ -215,7 +215,7 @@ onUnmounted(() => {
               {{ serviceLabel(orderService) }} · {{ statusLabel(orderStatus) }}
             </NText>
           </div>
-          <NButton quaternary size="small" @click="router.push(`/feed/orders/${activeOrderId}`)">Заказ</NButton>
+          <NButton quaternary size="small" @click="router.push(`/projects/${activeOrderId}`)">Заказ</NButton>
         </header>
 
         <NAlert v-if="warning" type="warning" closable style="margin: 8px 12px 0" @close="warning = ''">

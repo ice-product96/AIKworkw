@@ -7,6 +7,12 @@ import { MARKETPLACE_CATEGORIES } from '../constants/marketplace'
 
 const router = useRouter()
 const auth = useAuthStore()
+
+function placeOrder() {
+  if (auth.user?.role === 'client') router.push('/cabinet/orders/new')
+  else if (auth.user) router.push('/cabinet')
+  else router.push('/register')
+}
 </script>
 
 <template>
@@ -20,10 +26,10 @@ const auth = useAuthStore()
         <NSpace align="center" :size="12">
           <NButton quaternary @click="router.push('/projects')">Биржа проектов</NButton>
           <NButton quaternary @click="router.push('/blog')">Блог</NButton>
-          <NButton v-if="auth.user" quaternary @click="router.push('/feed')">Лента</NButton>
+          <NButton v-if="auth.user" quaternary @click="router.push('/chat')">Чат</NButton>
           <NButton v-if="auth.user" quaternary @click="router.push('/cabinet')">Кабинет</NButton>
           <NButton v-if="!auth.user" quaternary @click="router.push('/login')">Вход</NButton>
-          <NButton type="primary" style="background: #4caf50; border-color: #4caf50" @click="router.push('/register')">
+          <NButton type="primary" style="background: #4caf50; border-color: #4caf50" @click="placeOrder">
             {{ auth.user ? 'Разместить заказ' : 'Регистрация' }}
           </NButton>
         </NSpace>

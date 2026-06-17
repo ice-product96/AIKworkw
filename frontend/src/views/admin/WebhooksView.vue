@@ -21,6 +21,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h2>Webhook логи</h2>
+  <h2>Журнал вебхуков</h2>
   <NDataTable :columns="columns" :data="events" />
 </template>
