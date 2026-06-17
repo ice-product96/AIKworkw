@@ -57,6 +57,9 @@ services:
       MINIO_SECURE: "false"
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://example.com}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
     depends_on:
       postgres:
         condition: service_healthy

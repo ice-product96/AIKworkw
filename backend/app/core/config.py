@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     presigned_url_expire_seconds: int = 3600
     estimate_expire_hours: int = 24
     webhook_max_attempts: int = 4
+    deepseek_api_key: str = ""
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-chat"
 
     @property
     def cors_origin_list(self) -> list[str]:

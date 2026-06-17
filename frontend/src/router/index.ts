@@ -8,10 +8,18 @@ const router = createRouter({
     { path: '/register', component: () => import('../views/RegisterView.vue'), meta: { guest: true } },
     {
       path: '/',
+      component: () => import('../layouts/MarketingLayout.vue'),
+      children: [
+        { path: '', component: () => import('../views/public/LandingView.vue') },
+        { path: 'blog', component: () => import('../views/public/BlogListView.vue') },
+        { path: 'blog/:slug', component: () => import('../views/public/BlogPostView.vue') },
+      ],
+    },
+    {
+      path: '/',
       component: () => import('../layouts/ShellLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: '', redirect: '/feed' },
         { path: 'feed', component: () => import('../views/feed/OrderFeedView.vue') },
         { path: 'feed/orders/:id', component: () => import('../views/feed/FeedOrderDetailView.vue') },
         { path: 'chat', component: () => import('../views/chat/ChatListView.vue') },
@@ -32,6 +40,8 @@ const router = createRouter({
             { path: 'admin/orders', component: () => import('../views/admin/OrdersView.vue'), meta: { role: 'admin' } },
             { path: 'admin/violations', component: () => import('../views/admin/ViolationsView.vue'), meta: { role: 'admin' } },
             { path: 'admin/webhooks', component: () => import('../views/admin/WebhooksView.vue'), meta: { role: 'admin' } },
+            { path: 'admin/ai', component: () => import('../views/admin/AiStudioView.vue'), meta: { role: 'admin' } },
+            { path: 'admin/content', component: () => import('../views/admin/ContentAdminView.vue'), meta: { role: 'admin' } },
           ],
         },
       ],

@@ -28,6 +28,8 @@ const menuOptions = computed<MenuOption[]>(() => {
   if (role === 'admin') {
     return [
       { label: 'Обзор', key: '/cabinet' },
+      { label: 'AI-студия', key: '/cabinet/admin/ai' },
+      { label: 'Контент / Блог', key: '/cabinet/admin/content' },
       { label: 'Пользователи', key: '/cabinet/admin/users' },
       { label: 'Агенты', key: '/cabinet/admin/agents' },
       { label: 'Заказы', key: '/cabinet/admin/orders' },

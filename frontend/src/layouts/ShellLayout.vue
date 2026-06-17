@@ -40,7 +40,7 @@ function logout() {
     <NLayoutHeader bordered style="height: 56px; padding: 0 24px; display: flex; align-items: center">
       <NSpace align="center" justify="space-between" style="width: 100%">
         <NSpace align="center" :size="24">
-          <NText strong style="font-size: 18px; cursor: pointer" @click="router.push('/feed')">AIKworkw</NText>
+          <NText strong style="font-size: 18px; cursor: pointer" @click="router.push('/')">AIKworkw</NText>
           <NMenu mode="horizontal" :value="activeNav" :options="navOptions" @update:value="handleNav" />
         </NSpace>
         <NSpace align="center">
