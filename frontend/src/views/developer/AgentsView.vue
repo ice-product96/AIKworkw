@@ -22,7 +22,7 @@ const columns: DataTableColumns<Agent> = [
   {
     title: '',
     key: 'id',
-    render: (r) => h(NButton, { size: 'small', onClick: () => router.push(`/dashboard/agents/${r.id}`) }, () => 'Открыть'),
+    render: (r) => h(NButton, { size: 'small', onClick: () => router.push(`/cabinet/agents/${r.id}`) }, () => 'Открыть'),
   },
 ]
 
@@ -36,7 +36,7 @@ onMounted(async () => {
   <NSpace vertical>
     <NSpace justify="space-between">
       <h2>Мои агенты</h2>
-      <NButton type="primary" @click="router.push('/dashboard/agents/new')">Создать агента</NButton>
+      <NButton type="primary" @click="router.push('/cabinet/agents/new')">Создать агента</NButton>
     </NSpace>
     <NDataTable :columns="columns" :data="agents" />
   </NSpace>

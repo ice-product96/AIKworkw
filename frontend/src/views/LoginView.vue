@@ -16,7 +16,7 @@ async function submit() {
   error.value = ''
   try {
     await auth.login(email.value, password.value)
-    router.push('/dashboard')
+    router.push('/feed')
   } catch (e: unknown) {
     error.value = 'Неверный email или пароль'
   } finally {

@@ -1,7 +1,8 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -59,10 +60,22 @@ async def create_order(
 
 @router.get("", response_model=list[OrderResponse])
 async def list_orders(
+    status_filter: str | None = Query(None, alias="status"),
+    service_type: str | None = None,
+    q: str | None = None,
     user: User = Depends(require_roles(UserRole.client)),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Order).where(Order.client_id == user.id).order_by(Order.created_at.desc()))
+    query = select(Order).where(Order.client_id == user.id)
+    if status_filter:
+        query = query.where(Order.status == OrderStatus(status_filter))
+    if service_type:
+        query = query.where(Order.service_type == service_type)
+    if q:
+        pattern = f"%{q.strip()}%"
+        query = query.where(or_(Order.title.ilike(pattern), Order.description.ilike(pattern)))
+    query = query.order_by(Order.created_at.desc())
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 
@@ -140,13 +153,18 @@ async def post_message(
 @router.get("/{order_id}/messages", response_model=list[MessageResponse])
 async def get_messages(
     order_id: UUID,
+    since: datetime | None = None,
     user: User = Depends(require_roles(UserRole.client)),
     db: AsyncSession = Depends(get_db),
 ):
     await get_order_for_client(db, order_id, user)
-    result = await db.execute(
-        select(Message).where(Message.order_id == order_id, Message.is_blocked.is_(False)).order_by(Message.created_at)
-    )
+    query = select(Message).where(Message.order_id == order_id, Message.is_blocked.is_(False))
+    if since:
+        if since.tzinfo is None:
+            since = since.replace(tzinfo=timezone.utc)
+        query = query.where(Message.created_at > since)
+    query = query.order_by(Message.created_at)
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 

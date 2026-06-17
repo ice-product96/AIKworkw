@@ -4,28 +4,40 @@ import { useAuthStore } from '../stores/auth'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/dashboard' },
     { path: '/login', component: () => import('../views/LoginView.vue'), meta: { guest: true } },
     { path: '/register', component: () => import('../views/RegisterView.vue'), meta: { guest: true } },
     {
-      path: '/dashboard',
-      component: () => import('../layouts/AppLayout.vue'),
+      path: '/',
+      component: () => import('../layouts/ShellLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: '', component: () => import('../views/DashboardView.vue') },
-        { path: 'orders', component: () => import('../views/client/OrdersView.vue'), meta: { role: 'client' } },
-        { path: 'orders/new', component: () => import('../views/client/CreateOrderView.vue'), meta: { role: 'client' } },
-        { path: 'orders/:id', component: () => import('../views/client/OrderDetailView.vue'), meta: { role: 'client' } },
-        { path: 'agents', component: () => import('../views/developer/AgentsView.vue'), meta: { role: 'developer' } },
-        { path: 'agents/new', component: () => import('../views/developer/CreateAgentView.vue'), meta: { role: 'developer' } },
-        { path: 'agents/:id', component: () => import('../views/developer/AgentDetailView.vue'), meta: { role: 'developer' } },
-        { path: 'admin/users', component: () => import('../views/admin/UsersView.vue'), meta: { role: 'admin' } },
-        { path: 'admin/agents', component: () => import('../views/admin/AgentsView.vue'), meta: { role: 'admin' } },
-        { path: 'admin/orders', component: () => import('../views/admin/OrdersView.vue'), meta: { role: 'admin' } },
-        { path: 'admin/violations', component: () => import('../views/admin/ViolationsView.vue'), meta: { role: 'admin' } },
-        { path: 'admin/webhooks', component: () => import('../views/admin/WebhooksView.vue'), meta: { role: 'admin' } },
+        { path: '', redirect: '/feed' },
+        { path: 'feed', component: () => import('../views/feed/OrderFeedView.vue') },
+        { path: 'feed/orders/:id', component: () => import('../views/feed/FeedOrderDetailView.vue') },
+        { path: 'chat', component: () => import('../views/chat/ChatListView.vue') },
+        { path: 'chat/:orderId', component: () => import('../views/chat/OrderChatView.vue') },
+        {
+          path: 'cabinet',
+          component: () => import('../layouts/CabinetLayout.vue'),
+          children: [
+            { path: '', component: () => import('../views/DashboardView.vue') },
+            { path: 'orders', component: () => import('../views/client/OrdersView.vue'), meta: { role: 'client' } },
+            { path: 'orders/new', component: () => import('../views/client/CreateOrderView.vue'), meta: { role: 'client' } },
+            { path: 'orders/:id', component: () => import('../views/client/OrderDetailView.vue'), meta: { role: 'client' } },
+            { path: 'agents', component: () => import('../views/developer/AgentsView.vue'), meta: { role: 'developer' } },
+            { path: 'agents/new', component: () => import('../views/developer/CreateAgentView.vue'), meta: { role: 'developer' } },
+            { path: 'agents/:id', component: () => import('../views/developer/AgentDetailView.vue'), meta: { role: 'developer' } },
+            { path: 'admin/users', component: () => import('../views/admin/UsersView.vue'), meta: { role: 'admin' } },
+            { path: 'admin/agents', component: () => import('../views/admin/AgentsView.vue'), meta: { role: 'admin' } },
+            { path: 'admin/orders', component: () => import('../views/admin/OrdersView.vue'), meta: { role: 'admin' } },
+            { path: 'admin/violations', component: () => import('../views/admin/ViolationsView.vue'), meta: { role: 'admin' } },
+            { path: 'admin/webhooks', component: () => import('../views/admin/WebhooksView.vue'), meta: { role: 'admin' } },
+          ],
+        },
       ],
     },
+    { path: '/dashboard', redirect: '/cabinet' },
+    { path: '/dashboard/:pathMatch(.*)*', redirect: (to) => `/cabinet/${to.params.pathMatch}` },
   ],
 })
 
@@ -44,10 +56,10 @@ router.beforeEach(async (to) => {
     }
   }
   if (to.meta.guest && auth.user) {
-    return '/dashboard'
+    return '/feed'
   }
   if (to.meta.role && auth.user && auth.user.role !== to.meta.role) {
-    return '/dashboard'
+    return '/feed'
   }
 })
 

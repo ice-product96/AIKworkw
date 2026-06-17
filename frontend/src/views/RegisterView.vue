@@ -23,7 +23,7 @@ async function submit() {
   try {
     await auth.register(email.value, password.value, role.value)
     await auth.login(email.value, password.value)
-    router.push('/dashboard')
+    router.push('/feed')
   } catch {
     error.value = 'Ошибка регистрации'
   } finally {

@@ -15,7 +15,7 @@ async function submit() {
     description: description.value,
     webhook_url: webhookUrl.value || null,
   })
-  router.push(`/dashboard/agents/${data.id}`)
+  router.push(`/cabinet/agents/${data.id}`)
 }
 </script>
 
